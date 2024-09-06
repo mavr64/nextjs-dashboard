@@ -27,8 +27,8 @@ export async function createInvoice(formData: FormData) {
         status: formData.get('status'),
     });
     // Test it out:
-    console.log(customerId);
-    console.log(typeof amount);
+    //console.log(customerId);
+    //console.log(typeof amount);
     //Обычно рекомендуется хранить денежные значения в центах в вашей базе данных, чтобы исключить ошибки JavaScript с плавающей запятой и обеспечить большую точность.
     // Переведем сумму в центы:
     const amountInCents = amount * 100;
@@ -39,11 +39,11 @@ export async function createInvoice(formData: FormData) {
         let values = [customerId, amountInCents, status, date];
         await mysql.query(`INSERT INTO invoices (customer_id, amount, status, date) VALUES (?, ?, ?, ?)`, values);
         await mysql.end();
+        revalidatePath('/dashboard/invoices');
 
     } catch (error) {
         return { error };
     }
-    revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
 }
 
@@ -69,7 +69,6 @@ export async function updateInvoice(id: string, formData: FormData) {
     } catch (error) {
         return { error };
     }
-
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
 }
@@ -82,9 +81,10 @@ export async function deleteInvoice(id: string) {
         //let values = [];
         await mysql.query(sqlquery, values);
         await mysql.end();
+        revalidatePath('/dashboard/invoices');
+        return { message: 'Deleted Invoice' };
 
     } catch (error) {
         return { error };
     }
-    revalidatePath('/dashboard/invoices');
 }

@@ -9,15 +9,7 @@ export default function Page() {
   return (
 
       <main className="flex min-h-screen flex-col p-6">
-          <script src="http://localhost:8097"></script>
-          <div>
-              <Link href="/" locale="en">
-                  <a className={styles.locale}>English</a>
-              </Link>
-              <Link href="/" locale="ru">
-                  <a className={styles.locale}>Русский</a>
-              </Link>
-          </div>
+          <script src="http://localhost:8097" async />
           <div className="flex h-20 shrink-0 items-end rounded-lg bg-blue-500 p-4 md:h-52">
               {<AcmeLogo/>}
               <div className={styles.shape}/>
