@@ -4,7 +4,7 @@
  * мы будем использовать Zod, библиотеку проверки на основе TypeScript, которая может упростить вам эту задачу.
  **/
 import { z } from 'zod';
-import { mysql } from '@/app/lib/mysql';
+import { mysql } from './mysql';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -15,6 +15,9 @@ const FormSchema = z.object({
     status: z.enum(['pending', 'paid']),
     date: z.string(),
 });
+
+// Use Zod to update the expected types
+const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 export async function createInvoice(formData: FormData) {
@@ -42,4 +45,46 @@ export async function createInvoice(formData: FormData) {
     }
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
+}
+
+export async function updateInvoice(id: string, formData: FormData) {
+    const { customerId, amount, status } = UpdateInvoice.parse({
+        customerId: formData.get('customerId'),
+        amount: formData.get('amount'),
+        status: formData.get('status'),
+    });
+    const amountInCents = amount * 100;
+
+    // Test it out:
+    //console.log(customerId, amount, amountInCents, status);
+
+    try {
+        const sqlquery = `UPDATE invoices SET customer_id = '${customerId}', amount = '${amountInCents}', status = '${status}' WHERE id = '${id}'`;
+        //console.log(sqlquery);
+        //let values = [customerId, amountInCents, status, id];
+        let values = [];
+        await mysql.query(sqlquery, values);
+        await mysql.end();
+
+    } catch (error) {
+        return { error };
+    }
+
+    revalidatePath('/dashboard/invoices');
+    redirect('/dashboard/invoices');
+}
+
+export async function deleteInvoice(id: string) {
+    try {
+        const sqlquery = `DELETE FROM invoices WHERE id = '?'`;
+        //console.log(sqlquery);
+        let values = [id];
+        //let values = [];
+        await mysql.query(sqlquery, values);
+        await mysql.end();
+
+    } catch (error) {
+        return { error };
+    }
+    revalidatePath('/dashboard/invoices');
 }

@@ -132,26 +132,32 @@ export async function fetchInvoicesPages(query: string) {
 
 export async function fetchInvoiceById(id: string) {
   try {
-    const data = await excuteQuery<InvoiceForm>`
-      SELECT
-        invoices.id,
-        invoices.customer_id,
-        invoices.amount,
-        invoices.status
-      FROM invoices
-      WHERE invoices.id = ${id};
-    `;
+    const sqlquery = `SELECT invoices.id, invoices.customer_id, invoices.amount, invoices.status FROM invoices WHERE invoices.id = '${id}'`;
+    console.log(sqlquery);
+    const data = await excuteQuery<InvoiceForm>({query: sqlquery, values: [id]});
 
-    const invoice = data.map((invoice) => ({
+    //console.log('============================');
+    //console.log('data fetchInvoiceById:', data);
+    //console.log('============================');
+    /*const invoice = data.map((invoice) => ({
       ...invoice,
       // Convert amount from cents to dollars
       amount: invoice.amount / 100,
-    }));
+    }));*/
+    const invoice = [];
+    for (const invoice1 of data) {
+      invoice.push({
+        ...invoice1,
+        // Convert amount from cents to dollars
+        amount: invoice1.amount / 100,
+      });
+    }
+    console.log('invoice fetchInvoiceById:', invoice[0]);
 
     return invoice[0];
   } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
+    console.error('Database Error fetchInvoiceById:', error);
+    throw new Error('Failed to fetch invoice by id.');
   }
 }
 
@@ -159,8 +165,15 @@ export async function fetchCustomers() {
   try {
     const data = await excuteQuery<CustomerField>({query:`SELECT id, name FROM customers ORDER BY name ASC`, values: []});
 
-    console.log('data fetch completed:', data);
-    const customers = data;
+    console.log('data fetchCustomers fetch completed:', data);
+    //const customers = data;
+    const customers = [];
+    for (const customers1 of data) {
+      customers.push({
+        ...customers1,
+
+      });
+    }
     return customers;
   } catch (err) {
     console.error('Database Error:', err);
